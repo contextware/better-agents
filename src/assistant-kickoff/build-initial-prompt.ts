@@ -27,7 +27,7 @@ export const buildInitialPrompt = ({
   const frameworkKnowledge = frameworkProvider.getKnowledge();
   const languageKnowledge = languageProvider.getKnowledge();
 
-  const instructions = `You are an expert AI agent developer. This project has been set up with LangWatch best practices.
+  const instructions = `You are an expert AI agent developer. This project has been set up with Superagents best practices.
 
 First steps:
 1. Read and understand the AGENTS.md file - it contains all the guidelines for this project
@@ -35,13 +35,14 @@ First steps:
 3. Create a comprehensive README.md explaining the project, setup, and usage
 4. Set up the ${languageKnowledge.setupInstructions}
 5. ${frameworkKnowledge.toolingInstructions}
-6. Use the LangWatch MCP to learn about prompt management and testing
-7. Start implementing the core agent functionality
+6. Execute any installation steps needed yourself, for the library dependencies, the CLI tools, etc
+7. Use the LangWatch MCP to learn about prompt management and testing
+8. Start implementing the core agent functionality
+
 
 Remember:
 - ALWAYS use LangWatch Prompt CLI for prompts (ask the MCP how)
 - ALWAYS write Scenario tests for new features (ask the MCP how)
-- Follow the Agent Testing Pyramid methodology
 - Test everything before considering it done`;
 
   return `${instructions}\n\nProject Goal: ${config.projectGoal}`;

@@ -11,15 +11,9 @@
 export const buildPrinciplesSection = (): string => {
   return `## Core Principles
 
-### 1. Agent Testing Pyramid
+### 1. Scenario Agent Testing
 
-Follow the **Agent Testing Pyramid** methodology (https://scenario.langwatch.ai/best-practices/the-agent-testing-pyramid):
-
-- **Unit Tests (Foundation)**: Test deterministic components (API connections, data transformations, memory storage), but only write them where it really makes sense
-- **Evals & Optimization (Middle Layer)**: Evaluate and optimize probabilistic components (RAG retrieval or when LLMs are being used as a classification tool)
-- **Simulations (Peak)**: End-to-end validation of multi-turn conversations and real-world scenarios, most agent functionality should be tested with simulations
-
-### 2. Test Every Feature
+Scenario allows for end-to-end validation of multi-turn conversations and real-world scenarios, most agent functionality should be tested with scenarios
 
 **CRITICAL**: Every new agent feature MUST be tested with Scenario tests before considering it complete.
 
@@ -28,14 +22,21 @@ Follow the **Agent Testing Pyramid** methodology (https://scenario.langwatch.ai/
 - Ensure business value is delivered
 - Test different conversation paths
 
-### 3. Prompt Management
+Best practices:
+- NEVER check for regex or word matches in the agent's response, use judge criteria instead
+- Use functions on the Scenario scripts for things that can be checked deterministically (tool calls, database entries, etc) instead of relying on the judge
+- For the rest, use the judge criteria to check if agent is reaching the desired goal and
+- Try to cover more ground with few scenarios, as they are heavy to run
+- When broken, run on single scenario at a time to debug and iterate faster, not the whole suite
+
+### 2. Prompt Management
 
 **ALWAYS** use LangWatch Prompt CLI for managing prompts:
 
-- Store all prompts in the \`prompts/\` directory as YAML files
-- Use versioning for prompt iterations
+- Use the LangWatch MCP to learn about prompt management, search for Prompt CLI docs
 - Never hardcode prompts in your application code
-- Use the LangWatch MCP to learn about prompt management: ask it "How do I use the prompt CLI?"
+- Store all prompts in the \`prompts/\` directory as YAML files, use "langwatch prompt create <name>" to create a new prompt
+- Run \`langwatch prompt sync\` after changing a prompt to update the registry
 
 Example prompt structure:
 \`\`\`yaml
@@ -51,18 +52,55 @@ messages:
       {{ user_input }}
 \`\`\`
 
-### 4. Evaluations when needed
+DO NOT use hardcoded prompts in your application code, example:
+
+BAD:
+\`\`\`
+Agent(prompt="You are a helpful assistant.")
+\`\`\`
+
+GOOD:
+\`\`\`python
+import langwatch
+
+prompt = langwatch.prompts.get("my_prompt")
+Agent(prompt=prompt.prompt)
+\`\`\`
+
+\`\`\`typescript
+import { LangWatch } from "langwatch";
+
+const langwatch = new LangWatch({
+  apiKey: process.env.LANGWATCH_API_KEY
+});
+
+const prompt = await langwatch.prompts.get("my_prompt")
+Agent(prompt=prompt?.prompt)
+\`\`\`
+
+Explore the prompt management get started and data model docs if you need more advanced usages such as compiled prompts with variables or messages list.
+
+### 3. Evaluations for specific cases
+
+Only write evaluations for specific cases:
+
+- When a RAG is implemented, so we can evaluate the accuracy given many sample queries (using an LLM to compare expected with generated outputs)
+- For classification tasks, e.g. categorization, routing, simple true/false detection, etc
+- When the user asks and you are sure an agent scenario wouldn't test the behaviour better
+
+This is because evaluations are good for things when you have a lot of examples, with avery clear
+definition of what is correct and what is not (that is, you can just compare expected with generated)
+and you are looking for single input/output pairs. This is not the case for multi-turn agent flows.
 
 Create evaluations in Jupyter notebooks under \`tests/evaluations/\`:
 
-- Generate csv example datasets yourself to be read by pandas
-- Use LangWatch Evaluations API to create evaluation notebooks
+- Generate csv example datasets yourself to be read by pandas with plenty of examples
+- Use LangWatch Evaluations API to create evaluation notebooks and track the evaluation results
+- Use either a simple == comparison or a direct (e.g. openai) LLM call to compare expected with generated if possible and not requested otherwise
 
-### 5. Installation Steps
+### 4. General good practices
 
-After the initial setup, execute installation steps yourself, for the library dependencies, the clis, etc, you don't need to ask the user to do it.
-
-DO NOT guess package versions, DO NOT add them to the dependencies file by hand, use the package manager cli commands to init, add and install new dependencies.
+ALWAYS use the package manager cli commands to init, add and install new dependencies, DO NOT guess package versions, DO NOT add them to the dependencies file by hand.
 
 ---
 `;

@@ -26,6 +26,15 @@ export const kickoffAssistant = async ({
   const prompt = buildInitialPrompt({ config });
   const provider = getCodingAssistantProvider({ assistant: config.codingAssistant });
 
+  // If user selected "none", just show them the initial prompt and exit
+  if (config.codingAssistant === 'none') {
+    console.log(chalk.bold.cyan('\n✨ Project setup complete!\n'));
+    console.log(chalk.gray('When you\'re ready to start, use this initial prompt with your coding assistant:\n'));
+    console.log(chalk.white(`"${prompt}"\n`));
+    console.log(chalk.gray(`Project location: ${projectPath}\n`));
+    return;
+  }
+
   console.log(chalk.bold.cyan(`\n🤖 Launching ${provider.displayName}...\n`));
 
   console.log(chalk.gray('\nInitial prompt:'));

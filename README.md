@@ -1,8 +1,16 @@
 # Superagents
 
-Superagents is a CLI tool and standards to supercharge your coding assistant (Claude Code, Cursor, etc) to be expert in building with your agent framework of choise (Agno, Mastra, etc) and structure your project with scenarios agent testing, evaluation notebooks, versioned prompts and observability instrumentation.
+Superagents is a CLI tool and a set of standards for agent building.
 
-Superagents allow you to create agents with best practices baked in and ready for production.
+It supercharges your coding assistant (Claude Code, Cursor, etc), making it an expert in any agent framework you choose (Agno, Mastra, etc) and all their best practices.
+
+The Superagent Structure and AGENTS.md ensures industry best practices, making your agent ready for production:
+- [Scenario](https://github.com/langwatch/scenario) agent tests written for every feature to ensure agent behaviour
+- Versioning of the prompts for collaboration
+- Evaluation notebooks for measuring specific prompts performance
+- Already instrumented for full observability
+- Standardization of structure for better project maintainability
+
 
 ### The Superagent Structure
 
@@ -68,7 +76,7 @@ The CLI will guide you through:
 
 1. **Programming Language**: Python or TypeScript
 2. **Agent Framework**: Agno (Python) or Mastra (TypeScript)
-3. **Coding Assistant**: Claude Code, Cursor CLI, or Kilocode CLI
+3. **Coding Assistant**: Claude Code, Cursor CLI, Kilocode CLI, or None (manual prompt)
 4. **LLM Provider**: OpenAI
 5. **API Keys**: OpenAI and LangWatch
 6. **Project Goal**: What you want to build
@@ -163,6 +171,8 @@ After project setup completes, Superagents **automatically launches** your chose
 - Next steps to get started
 
 The CLI detects which coding assistants are installed on your system and shows installed options first in the selection menu. Not installed assistants appear in gray with "(not installed)" but can still be selected.
+
+You can also select **"None - I will prompt it myself"** if you prefer to manually launch your coding assistant later with the provided initial prompt.
 
 ## Resources
 

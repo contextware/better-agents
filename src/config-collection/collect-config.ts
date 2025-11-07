@@ -27,9 +27,8 @@ import { validateProjectGoal } from "./validators/project-goal.js";
  */
 export const collectConfig = async (): Promise<ProjectConfig> => {
   try {
-    console.log(chalk.bold.cyan("\n🚀 Welcome to Superagents by LangWatch!\n"));
     console.log(
-      chalk.gray("Let's set up your production-ready agent project.\n")
+      chalk.gray("Setting up your agent project following the Superagent Structure.\n")
     );
 
     const language = await select({
@@ -42,15 +41,15 @@ export const collectConfig = async (): Promise<ProjectConfig> => {
       choices: buildFrameworkChoices({ language }),
     });
 
-    const codingAssistant = await select<CodingAssistant>({
-      message: "What is your preferred coding assistant?",
-      choices: await buildCodingAssistantChoices(),
-    });
-
     const allProviders = getAllLLMProviders();
     const llmProvider = await select<LLMProvider>({
-      message: "What LLM provider do you want to use?",
+      message: "What LLM provider is your agent going to use?",
       choices: allProviders.map((p) => ({ name: p.displayName, value: p.id as LLMProvider })),
+    });
+
+    const codingAssistant = await select<CodingAssistant>({
+      message: "What is your preferred coding assistant for building the agent?",
+      choices: await buildCodingAssistantChoices(),
     });
 
     const selectedProvider = allProviders.find((p) => p.id === llmProvider);
@@ -98,7 +97,7 @@ export const collectConfig = async (): Promise<ProjectConfig> => {
     console.log(chalk.blue.underline("https://app.langwatch.ai/authorize\n"));
 
     const langwatchApiKey = await password({
-      message: "Enter your LangWatch API key:",
+      message: "Enter your LangWatch API key (for prompt management, scenarios, evaluations and observability):",
       mask: "*",
       validate: validateLangWatchKey,
     });

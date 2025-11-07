@@ -32,7 +32,7 @@ export const getKnowledge = (): FrameworkKnowledge => ({
 4. Leverage Mastra's integration ecosystem
 
 **Initial setup:**
-1. Use \`pnpx mastra init\` to create a new mastra project.
+1. Use \`pnpx mastra init --default\` to create a new mastra project, do it before setting up the rest of the project, right after having done \`pnpm init\`.
 2. Then explore the setup it created, the folders, remove what not needed
 3. Proceed with the user definition request to implement the agent and test it out
 4. Open the UI for user to see using \`pnpx mastra dev\`
@@ -40,4 +40,3 @@ export const getKnowledge = (): FrameworkKnowledge => ({
 ---
 `,
 });
-

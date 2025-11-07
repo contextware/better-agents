@@ -48,6 +48,7 @@ export const detectInstalledAgents = async (): Promise<
     "claude-code": hasClaude,
     "cursor-cli": hasCursor,
     kilocode: hasKilocode,
+    none: true, // Always available since it doesn't require installation
   };
 };
 

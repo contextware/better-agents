@@ -1,6 +1,6 @@
 export type ProgrammingLanguage = 'python' | 'typescript';
 export type AgentFramework = 'agno' | 'mastra';
-export type CodingAssistant = 'claude-code' | 'cursor-cli' | 'kilocode';
+export type CodingAssistant = 'claude-code' | 'cursor-cli' | 'kilocode' | 'none';
 export type LLMProvider = 'openai' | 'anthropic' | 'gemini' | 'bedrock' | 'openrouter' | 'grok';
 
 export type ProjectConfig = {

@@ -1,6 +1,7 @@
 import { ClaudeCodingAssistantProvider } from "./claude/index.js";
 import { CursorCodingAssistantProvider } from "./cursor/index.js";
 import { KilocodeCodingAssistantProvider } from "./kilocode/index.js";
+import { NoneCodingAssistantProvider } from "./none/index.js";
 
 export type MCPConfigFile = {
   mcpServers: Record<
@@ -43,6 +44,7 @@ const PROVIDERS: Record<string, CodingAssistantProvider> = {
   "claude-code": ClaudeCodingAssistantProvider,
   "cursor-cli": CursorCodingAssistantProvider,
   kilocode: KilocodeCodingAssistantProvider,
+  none: NoneCodingAssistantProvider,
 };
 
 /**
