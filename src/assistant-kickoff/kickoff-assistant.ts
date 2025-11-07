@@ -26,13 +26,15 @@ export const kickoffAssistant = async ({
   const prompt = buildInitialPrompt({ config });
   const provider = getCodingAssistantProvider({ assistant: config.codingAssistant });
 
-  console.log(chalk.bold.cyan('\n🤖 Launching your coding assistant...\n'));
-  console.log(chalk.gray('Initial prompt:'));
-  console.log(chalk.white(`"${prompt}"\n`));
-  console.log(chalk.yellow(`Starting ${provider.displayName}...\n`));
+  console.log(chalk.bold.cyan(`\n🤖 Launching ${provider.displayName}...\n`));
+
+  console.log(chalk.gray('\nInitial prompt:'));
+  console.log(chalk.white(`"${prompt}"`));
 
   try {
     await provider.launch({ projectPath, prompt });
+    // execSync is blocking, so if we get here, the assistant has finished
+    console.log(chalk.bold.green('\n✨ Session complete!\n'));
   } catch (error) {
     if (error instanceof Error) {
       console.error(chalk.red(`\n❌ Failed to launch ${provider.displayName}: ${error.message}`));
@@ -40,7 +42,7 @@ export const kickoffAssistant = async ({
       console.log(chalk.cyan(`  cd ${projectPath}`));
       console.log(chalk.cyan(`  ${provider.command} "${prompt}"`));
     }
-    throw error;
+    process.exit(1);
   }
 };
 

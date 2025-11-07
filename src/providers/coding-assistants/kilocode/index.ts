@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { spawn } from "child_process";
+import { execSync } from "child_process";
 import type { CodingAssistantProvider, MCPConfigFile } from "../index.js";
 
 /**
@@ -17,26 +17,22 @@ export const KilocodeCodingAssistantProvider: CodingAssistantProvider = {
     await fs.writeFile(mcpConfigPath, JSON.stringify(config, null, 2));
   },
 
-  async launch({ projectPath, prompt }) {
-    return new Promise((resolve, reject) => {
-      const child = spawn("kilocode", [prompt], {
+  async launch({ projectPath, prompt }: { projectPath: string; prompt: string }): Promise<void> {
+    // Properly escape the prompt for shell execution
+    const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`');
+
+    try {
+      // Use execSync to run synchronously and hand over full control
+      execSync(`kilocode "${escapedPrompt}"`, {
         cwd: projectPath,
         stdio: "inherit",
-        shell: true,
       });
-
-      child.on("error", (error) => {
-        reject(new Error(`Failed to launch Kilocode CLI: ${error.message}`));
-      });
-
-      child.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`Kilocode CLI exited with code ${code}`));
-        }
-      });
-    });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to launch Kilocode CLI: ${error.message}`);
+      }
+      throw error;
+    }
   },
 };
 
