@@ -309,10 +309,11 @@ export class CLITestRunner {
             expect(output).toMatch(cmd.expectOutput);
           }
         }
-      } catch (error: any) {
+      } catch (error) {
+        const error_ = error as { stdout: string; stderr: string };
         if (cmd.expectSuccess) {
           throw new Error(
-            `Command "${cmd.command}" failed:\nstdout: ${error.stdout}\nstderr: ${error.stderr}`
+            `Command "${cmd.command}" failed:\nstdout: ${error_.stdout}\nstderr: ${error_.stderr}`
           );
         }
       }
