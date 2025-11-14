@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { logger } from "../../../utils/logger.js";
 import type { CodingAssistantProvider } from "../index.js";
 
 /**
@@ -41,13 +42,9 @@ export const NoneCodingAssistantProvider: CodingAssistantProvider = {
     projectPath: string;
     prompt: string;
   }): Promise<void> {
-    const chalk = (await import("chalk")).default;
-
     // No auto-launch - just show instructions
-    console.log(
-      chalk.gray(
-        "When you're ready, use the initial prompt above with your coding assistant.\n"
-      )
+    logger.userInfo(
+      "When you're ready, use the initial prompt above with your coding assistant."
     );
   },
 };

@@ -192,7 +192,7 @@ export class UnifiedLogger implements Logger {
 
       // Create timestamped log file name: debug-YYYY-MM-DD-HH-MM-SS.log
       const now = new Date();
-      const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
       const logPath = path.join(logDir, `debug-${timestamp}.log`);
 
       await fs.mkdir(logDir, { recursive: true });
@@ -211,7 +211,7 @@ export class UnifiedLogger implements Logger {
       );
     } catch (error) {
       // Silently fail project logging setup - don't break user experience
-      console.warn("Failed to setup project debug logging:", error);
+      // Note: We can't use logger here since we're in the logger setup
     }
   }
 

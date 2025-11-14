@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { logger } from "../../../utils/logger.js";
 import type { CodingAssistantProvider } from "../index.js";
 
 /**
@@ -35,14 +36,10 @@ export const CursorCodingAssistantProvider: CodingAssistantProvider = {
     projectPath: string;
     prompt: string;
   }): Promise<void> {
-    const chalk = (await import("chalk")).default;
-
     // Cursor doesn't support CLI launching, show instructions instead
-    console.log(chalk.yellow("To start with Cursor:\n"));
-    console.log(chalk.cyan(`  1. Open Cursor`));
-    console.log(chalk.cyan(`  2. Open the folder: ${projectPath}`));
-    console.log(
-      chalk.cyan(`  3. Use the initial prompt above with Cursor Composer\n`)
-    );
+    logger.userWarning("To start with Cursor:");
+    logger.userInfo("  1. Open Cursor");
+    logger.userInfo(`  2. Open the folder: ${projectPath}`);
+    logger.userInfo("  3. Use the initial prompt above with Cursor Composer");
   },
 };

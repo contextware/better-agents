@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { initCommand } from './commands/init.js';
+import { initCommand } from './commands/init';
 
 const program = new Command();
 
@@ -14,8 +14,9 @@ program
   .description('Initialize a new agent project')
   .argument('[path]', 'Path to initialize the project (defaults to current directory)', '.')
   .action((path, options) => {
-    // Pass debug option to init command
-    return initCommand(path, options.parent.debug);
+    // Pass debug option to init command (default to false if not provided)
+    const debug = options.parent?.debug || false;
+    return initCommand(path, debug);
   });
 
 program.parse();

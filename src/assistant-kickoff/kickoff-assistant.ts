@@ -1,5 +1,5 @@
-import chalk from 'chalk';
 import type { ProjectConfig } from '../types.js';
+import { logger } from '../utils/logger.js';
 import { buildInitialPrompt } from './build-initial-prompt.js';
 import { getCodingAssistantProvider } from '../providers/coding-assistants/index.js';
 
@@ -26,10 +26,10 @@ export const kickoffAssistant = async ({
   const prompt = buildInitialPrompt({ config });
   const provider = getCodingAssistantProvider({ assistant: config.codingAssistant });
 
-  console.log(chalk.bold.cyan('\n✨ Project setup complete!\n'));
-  console.log(chalk.gray('Initial prompt:\n'));
-  console.log(chalk.white(`"${prompt}"\n`));
-  console.log(chalk.gray(`Project location: ${projectPath}\n`));
+  logger.userSuccess('Project setup complete!');
+  logger.userInfo('Initial prompt:');
+  logger.userInfo(`"${prompt}"`);
+  logger.userInfo(`Project location: ${projectPath}`);
 
   // Let the provider handle its own launch behavior
   await provider.launch({ projectPath, prompt });

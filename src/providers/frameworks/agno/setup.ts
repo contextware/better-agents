@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { logger } from "../../../utils/logger.js";
 
 const AGNO_CURSORRULES_URL =
   "https://raw.githubusercontent.com/agno-agi/agno/main/.cursorrules";
@@ -57,7 +58,7 @@ const fetchFile = async ({
     const content = await response.text();
     await fs.writeFile(targetPath, content);
   } catch (error) {
-    console.warn(`Warning: Could not fetch ${url}`, error);
+    logger.userWarning(`Could not fetch ${url}, using fallback`);
     await fs.writeFile(targetPath, fallback);
   }
 };

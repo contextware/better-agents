@@ -2,6 +2,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { ProcessUtils } from "../../../utils/process.util";
 import { CliUtils } from "../../../utils/cli.util";
+import { logger } from "../../../utils/logger.js";
 import type { CodingAssistantProvider } from "../index.js";
 
 /**
@@ -36,23 +37,17 @@ export const KilocodeCodingAssistantProvider: CodingAssistantProvider = {
     projectPath: string;
     prompt: string;
   }): Promise<void> {
-    const chalk = (await import("chalk")).default;
-
     try {
-      console.log(chalk.bold.cyan(`🤖 Launching ${this.displayName}...\n`));
+      logger.userInfo(`🤖 Launching ${this.displayName}...`);
       // Launch kilocode with full terminal control
       // This blocks until kilocode exits
       ProcessUtils.launchWithTerminalControl("kilocode", [prompt], {
         cwd: projectPath,
       });
-      console.log(chalk.bold.green("\n✨ Session complete!\n"));
+      logger.userSuccess("Session complete!");
     } catch (error) {
       if (error instanceof Error) {
-        console.error(
-          chalk.red(
-            `\n❌ Failed to launch ${this.displayName}: ${error.message}`
-          )
-        );
+        logger.userError(`Failed to launch ${this.displayName}: ${error.message}`);
       }
       throw error;
     }
