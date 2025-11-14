@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import type { CodingAssistantProvider, MCPConfigFile } from "../index.js";
+import type { CodingAssistantProvider } from "../index.js";
 
 /**
  * None provider - for users who want to set up the project but prompt their assistant manually.

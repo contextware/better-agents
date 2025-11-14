@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { launchWithTerminalControl } from "../../../utils/process-replacement.js";
-import type { CodingAssistantProvider, MCPConfigFile } from "../index.js";
+import type { CodingAssistantProvider } from "../index.js";
 
 /**
  * Kilocode assistant provider implementation.
