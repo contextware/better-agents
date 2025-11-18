@@ -29,6 +29,7 @@ Best practices:
 - When broken, run on single scenario at a time to debug and iterate faster, not the whole suite
 - Write as few scenarios as possible, try to cover more ground with few scenarios, as they are heavy to run
 - If user made 1 request, just 1 scenario might be enough, run it at the end of the implementation to check if it works
+- ALWAYS consult the Scenario docs on how to write scenarios, do not assume the syntax
 
 ### 2. Prompt Management
 

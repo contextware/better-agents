@@ -39,14 +39,15 @@ First steps:
 7. Use the LangWatch MCP to learn about prompt management and testing
 8. Start implementing the core agent functionality
 9. Instrument the agent with LangWatch
-10. Use Scenario tests to ensure the agent is working as expected, integrate with the agent and consider it done only when all scenarios pass
-11. If available from the framework, open a dev server for the user in the background and give them the url so they can play with the agent themselves
+10. Use Scenario tests to ensure the agent is working as expected, integrate with the agent and consider it done only when all scenarios pass, check scenario docs on how to implement
+11. If available from the framework, tell the user how to open a dev server give them the url they will be able to access so they can play with the agent themselves, don't run it for them
 
 
 Remember:
+- The LLM and LangWatch API keys are already available in the .env file, you don't need to set them up
 - ALWAYS use LangWatch Prompt CLI for prompts (ask the MCP how)
 - ALWAYS write Scenario tests for new features (ask the MCP how)
-- The LLM and LangWatch API keys are already available in the .env file
+- DO NOT test it "manually", always use the Scenario tests instead, do not open the dev server for the user, let them do it themselves only at the end of the implementation with everything working
 - Test everything before considering it done`;
 
   return `${instructions}\n\nAgent Goal: ${config.projectGoal}`;

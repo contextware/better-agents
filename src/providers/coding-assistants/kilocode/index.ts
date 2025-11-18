@@ -41,7 +41,7 @@ export const KilocodeCodingAssistantProvider: CodingAssistantProvider = {
       logger.userInfo(`🤖 Launching ${this.displayName}...`);
       // Launch kilocode with full terminal control
       // This blocks until kilocode exits
-      ProcessUtils.launchWithTerminalControl("kilocode", [prompt], {
+      ProcessUtils.launchWithTerminalControl("kilocode", ["-a", prompt], {
         cwd: projectPath,
       });
       logger.userSuccess("Session complete!");
