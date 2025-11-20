@@ -23,17 +23,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache-dependency-path: "javascript/pnpm-lock.yaml"
+          cache-dependency-path: "pnpm-lock.yaml"
           node-version: "24.x"
           cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        working-directory: javascript
         run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        working-directory: javascript
         run: pnpm test:ci
 
       - name: Extract version from tag
@@ -55,6 +53,5 @@ jobs:
 
       - name: Publish to npm
         run: pnpm publish --no-git-checks --tag ${{ steps.disttag.outputs.tag }}
-        working-directory: javascript
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
