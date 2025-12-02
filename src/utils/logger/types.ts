@@ -59,6 +59,18 @@ export interface Logger {
   userSuccess(message: string): void;
 
   /**
+   * Logs user-facing text with green color (no emoji).
+   * @param message - The message to display in green
+   */
+  userGreen(message: string): void;
+
+  /**
+   * Logs user-facing plain text (no color, no emoji).
+   * @param message - The message to display
+   */
+  userPlain(message: string): void;
+
+  /**
    * Logs user-facing error message with red color and X mark.
    * @param message - The error message to display
    */

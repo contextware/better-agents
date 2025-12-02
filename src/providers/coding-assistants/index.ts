@@ -46,7 +46,7 @@ export interface CodingAssistantProvider {
   isAvailable(): Promise<{ installed: boolean; installCommand?: string }>;
 
   /** Launches the assistant with the given prompt */
-  launch(params: { projectPath: string; prompt: string }): Promise<void>;
+  launch(params: { projectPath: string; targetPath: string; prompt: string }): Promise<void>;
 }
 
 const PROVIDERS: Record<string, CodingAssistantProvider> = {

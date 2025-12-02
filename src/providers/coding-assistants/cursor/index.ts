@@ -19,15 +19,30 @@ export const CursorCodingAssistantProvider: CodingAssistantProvider = {
   },
 
   async launch({
-    projectPath,
+    targetPath,
   }: {
     projectPath: string;
+    targetPath: string;
     prompt: string;
   }): Promise<void> {
-    // Cursor doesn't support CLI launching, show instructions instead
-    logger.userWarning("To start with Cursor:");
-    logger.userInfo("  1. Open Cursor");
-    logger.userInfo(`  2. Open the folder: ${projectPath}`);
-    logger.userInfo("  3. Use the initial prompt above with Cursor Composer");
+    const isCurrentDir = targetPath === ".";
+
+    logger.userPlain('');
+    logger.userPlain('To get started with Cursor:');
+    logger.userPlain('');
+    if (isCurrentDir) {
+      logger.userPlain('  1. Open the current folder in Cursor:');
+      logger.userPlain('');
+      logger.userPlain('     cursor .');
+    } else {
+      logger.userPlain('  1. Open the project in Cursor:');
+      logger.userPlain('');
+      logger.userPlain(`     cursor ${targetPath}`);
+    }
+    logger.userPlain('');
+    logger.userPlain('  2. Open Cursor Composer (Cmd+I or Ctrl+I)');
+    logger.userPlain('');
+    logger.userPlain('  3. Copy and paste the prompt above to start building your agent');
+    logger.userPlain('');
   },
 };

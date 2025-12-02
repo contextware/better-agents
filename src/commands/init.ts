@@ -128,7 +128,7 @@ export const initCommand = async (targetPath: string, debug = false): Promise<vo
         success: true
       });
 
-      await kickoffAssistant({ projectPath: absolutePath, config });
+      await kickoffAssistant({ projectPath: absolutePath, targetPath, config });
     } catch (error) {
       spinner.fail("Failed to set up project");
 

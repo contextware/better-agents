@@ -1,4 +1,4 @@
-import { logger } from "../../../utils/logger/index.js";
+import { showManualLaunchInstructions } from "../../../assistant-kickoff/kickoff-assistant.js";
 import type { CodingAssistantProvider } from "../index.js";
 
 /**
@@ -18,13 +18,13 @@ export const NoneCodingAssistantProvider: CodingAssistantProvider = {
     return { installed: true };
   },
 
-  async launch(_params: {
+  async launch({
+    targetPath,
+  }: {
     projectPath: string;
+    targetPath: string;
     prompt: string;
   }): Promise<void> {
-    // No auto-launch - just show instructions
-    logger.userInfo(
-      "When you're ready, use the initial prompt above with your coding assistant."
-    );
+    showManualLaunchInstructions({ targetPath });
   },
 };

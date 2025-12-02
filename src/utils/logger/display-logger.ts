@@ -43,6 +43,30 @@ export class DisplayLogger {
   }
 
   /**
+   * Logs user-facing text with green color (no emoji).
+   * @param message - The message to display in green
+   */
+  userGreen(message: string): void {
+    if (this.spinner) {
+      this.spinner.info(chalk.green(message));
+    } else {
+      console.log(chalk.green(message));
+    }
+  }
+
+  /**
+   * Logs user-facing plain text (no color, no emoji).
+   * @param message - The message to display
+   */
+  userPlain(message: string): void {
+    if (this.spinner) {
+      this.spinner.info(message);
+    } else {
+      console.log(message);
+    }
+  }
+
+  /**
    * Logs user-facing error message with red color and X mark.
    * @param message - The error message to display
    */

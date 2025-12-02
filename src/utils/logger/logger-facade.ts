@@ -57,6 +57,28 @@ export class LoggerFacade implements Logger {
   }
 
   /**
+   * Logs user-facing text with green color (no emoji).
+   * @param message - The message to display in green
+   */
+  userGreen(message: string): void {
+    this.displayLogger.userGreen(message);
+    // Also log to debug systems for consistency
+    this.baseLogger.debug('user-green', { message, type: 'highlight' });
+    this.consoleLogger.debug('user-green', { message, type: 'highlight' });
+  }
+
+  /**
+   * Logs user-facing plain text (no color, no emoji).
+   * @param message - The message to display
+   */
+  userPlain(message: string): void {
+    this.displayLogger.userPlain(message);
+    // Also log to debug systems for consistency
+    this.baseLogger.debug('user-plain', { message, type: 'plain' });
+    this.consoleLogger.debug('user-plain', { message, type: 'plain' });
+  }
+
+  /**
    * Logs user-facing error message with red color and X mark.
    * @param message - The error message to display
    */

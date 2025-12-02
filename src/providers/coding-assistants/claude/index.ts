@@ -1,6 +1,7 @@
 import { ProcessUtils } from "../../../utils/process.util.js";
 import { CliUtils } from "../../../utils/cli.util.js";
 import { logger } from "../../../utils/logger/index.js";
+import { showManualLaunchInstructions } from "../../../assistant-kickoff/kickoff-assistant.js";
 import type { CodingAssistantProvider } from "../index.js";
 
 /**
@@ -27,9 +28,11 @@ export const ClaudeCodingAssistantProvider: CodingAssistantProvider = {
 
   async launch({
     projectPath,
+    targetPath,
     prompt,
   }: {
     projectPath: string;
+    targetPath: string;
     prompt: string;
   }): Promise<void> {
     try {
@@ -41,10 +44,14 @@ export const ClaudeCodingAssistantProvider: CodingAssistantProvider = {
       });
       logger.userSuccess("Session complete!");
     } catch (error) {
-      if (error instanceof Error) {
-        logger.userError(`Failed to launch ${this.displayName}: ${error.message}`);
-      }
-      throw error;
+      logger.userWarning(`Could not auto-launch ${this.displayName}.`);
+      showManualLaunchInstructions({
+        targetPath,
+        assistantName: this.displayName,
+      });
+      logger.userPlain('  Or run directly:');
+      logger.userPlain(`     claude "<paste the prompt>"`);
+      logger.userPlain('');
     }
   },
 };
