@@ -101,6 +101,7 @@ The CLI will guide you through selecting your programming language, agent framew
 - [Agent Testing Pyramid](https://scenario.langwatch.ai/best-practices/the-agent-testing-pyramid)
 - [Agno](https://agno.com)
 - [Mastra](https://mastra.ai)
+- [Discord](https://discord.com/invite/kT4PhDS2gH)
 
 ## License
 
