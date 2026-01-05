@@ -17,6 +17,7 @@ import { getAllCodingAssistants } from "../providers/coding-assistants/index.js"
 import { validateOpenAIKey } from "./validators/openai-key.js";
 import { validateLangWatchKey } from "./validators/langwatch-key.js";
 import { validateProjectGoal } from "./validators/project-goal.js";
+import { trackEvent, trackEventAndShutdown } from "../analytics/index.js";
 import {
   isNonInteractiveMode,
   validateNonInteractiveOptions,
@@ -76,6 +77,7 @@ const validateFrameworkLanguage = (
 export const collectConfig = async (
   cliOptions: CLIOptions = {}
 ): Promise<ProjectConfig> => {
+  const configStart = Date.now();
   try {
     // Auto-detect non-interactive mode: if all required options are provided, skip prompts
     if (isNonInteractiveMode(cliOptions)) {
@@ -411,6 +413,15 @@ export const collectConfig = async (
       validate: validateProjectGoal,
     });
 
+    // Treat prompt_shown as "configuration done" to avoid redundant events
+    await trackEvent("cli_prompt_shown", {
+      language,
+      framework,
+      codingAssistant,
+      llmProvider,
+      durationSec: (Date.now() - configStart) / 1000,
+    });
+
     return {
       language,
       framework,
@@ -423,7 +434,15 @@ export const collectConfig = async (
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes("User force closed")) {
+      // User pressed Ctrl+C during prompts
       logger.userWarning("Setup cancelled by user");
+      // Track cancellation directly here since inquirer intercepts SIGINT
+      await trackEventAndShutdown("cli_init_failed", {
+        step: "config-collection",
+        errorType: "cancelled",
+        durationSec: (Date.now() - configStart) / 1000,
+        success: false,
+      });
       process.exit(0);
     }
     throw error;
