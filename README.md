@@ -97,6 +97,12 @@ The CLI will guide you through selecting your programming language, agent framew
 - API Keys:
   - LangWatch API key (get one at https://app.langwatch.ai/authorize)
   - Your chosen LLM Provider API key
+- Telemetry (optional):
+  - Anonymous usage telemetry is enabled by default.
+  - To opt out, set the environment variable:
+    ```bash
+    BETTER_AGENTS_TELEMETRY=0
+    ```
 
 ## Resources
 
