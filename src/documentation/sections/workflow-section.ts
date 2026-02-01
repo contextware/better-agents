@@ -40,10 +40,10 @@ This project follows a standardized structure for production-ready agents:
 
 ### When Starting a New Feature:
 
-1. **Check Installed Skills**: Review the "Installed Skills" section below and read their documentation.
+1. **Read Relevant SKILL.md Files First**: Before writing ANY code, check \`.agents/skills/\` and read the SKILL.md file for any skill related to your task. Skills contain authoritative patterns and tools that MUST be used.
 2. **Understand Requirements**: Clarify what the agent should do
-3. **Design the Approach**: Plan which components and skills you'll need
-4. **Implement with Prompts**: Use LangWatch Prompt CLI to create/manage prompts
+3. **Design the Approach**: Plan which components and skills you'll need (based on what you read in step 1)
+4. **Implement with Prompts**: Use LangWatch Prompt CLI to create/manage prompts (NEVER hardcode prompts)
 5. **Write Unit Tests**: Test deterministic components
 6. **Create Evaluations**: Build evaluation notebooks for probabilistic components
 7. **Write Scenario Tests**: Create end-to-end tests using Scenario
@@ -51,16 +51,20 @@ This project follows a standardized structure for production-ready agents:
 
 ### Always:
 
-- ✅ Follow specialized instructions in \`SKILL.md\` files
-- ✅ Version control your prompts
-- ✅ Write tests for new features
+- ✅ Read SKILL.md files BEFORE implementing related features
+- ✅ Initialize LangWatch SDK and enable \`experimental_telemetry\` in all LLM calls
+- ✅ Fetch prompts from LangWatch using \`langwatch.prompts.get()\`
+- ✅ Version control your prompts using \`langwatch prompt sync\`
+- ✅ Write Scenario tests for new features using \`scenario.run()\`
 - ✅ Use LangWatch MCP to learn best practices and to work with Scenario tests and evaluations
 - ✅ Follow the Agent Testing Pyramid
-- ✅ Document your agent's capabilities
+- ✅ Verify traces appear in LangWatch dashboard after running tests
 
 ### Never:
 
-- ❌ Hardcode prompts in application code
+- ❌ Hardcode prompts in application code (always use \`langwatch.prompts.get()\`)
+- ❌ Initialize LangWatch without enabling telemetry in LLM calls
+- ❌ Skip reading SKILL.md files when working on related features
 - ❌ Skip testing new features
 - ❌ Commit API keys or sensitive data
 - ❌ Optimize without measuring (use evaluations first)
@@ -94,7 +98,7 @@ The MCP will provide up-to-date documentation and examples. For Scenario specifi
 
 - **Scenario Documentation**: https://scenario.langwatch.ai/
 - **Agent Testing Pyramid**: https://scenario.langwatch.ai/best-practices/the-agent-testing-pyramid
-- **LangWatch Dashboard**: https://app.langwatch.ai/
+- **LangWatch Dashboard**: ${config.langwatchEndpoint || "https://app.langwatch.ai/"}
     ${config.framework === 'agno'
       ? '- **Agno Documentation**: https://docs.agno.com/'
       : config.framework === 'langgraph-py'

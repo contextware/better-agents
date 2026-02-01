@@ -42,6 +42,9 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_sample_scenario():
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
     await scenario.run(
         id="sample-scenario",
         name="Sample Scenario",
@@ -66,6 +69,14 @@ import * as scenario from "@langwatch/scenario";
 // import { myAgent } from "../../src/mastra/agents/index.js"; // Import your agent here
 
 it("should handle sample request", async () => {
+    // Proactively load .env for LangWatch API keys and custom endpoint
+    try {
+        const dotenv = await import("dotenv");
+        dotenv.config();
+    } catch {
+        // dotenv not installed yet, that's fine
+    }
+
     await scenario.run({
         id: "sample-scenario",
         name: "Sample Scenario",

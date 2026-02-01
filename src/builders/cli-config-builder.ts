@@ -101,7 +101,7 @@ export const setupCLIConfigs = async ({
             type: "stdio",
             command: serverConfig.command,
             args: serverConfig.args || [],
-            env: (server as any).env || {},
+            env: (server as { env?: Record<string, string> }).env || {},
           };
         }
       }

@@ -52,7 +52,6 @@ export const parseSkillMetadata = (skillName: string, content: string): SkillMet
   if (!metadata.description) {
     const summaryMatch = content.match(/# Skill Summary:\s*(.+)/);
     if (summaryMatch) {
-      const summaryLine = summaryMatch[1].trim();
       // Try to get description from next lines
       const lines = content.split('\n');
       const summaryIndex = lines.findIndex(l => l.includes('# Skill Summary:'));

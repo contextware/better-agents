@@ -118,7 +118,6 @@ export const collectConfig = async (
       }
 
       // Get LLM provider-specific API key from environment
-      const allProviders = getAllLLMProviders();
       let llmApiKey: string;
       let llmAdditionalInputs: Record<string, string> | undefined;
 

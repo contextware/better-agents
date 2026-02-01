@@ -119,12 +119,12 @@ Best practices:
 - Use the LangWatch MCP to learn about prompt management, search for Prompt CLI docs
 - Never hardcode prompts in your application code
 - Store all prompts in the \`prompts/\` directory as YAML files, use "langwatch prompt create <name>" to create a new prompt
-- Run \`langwatch prompt sync\` after changing a prompt to update the registry
+- Run \`langwatch prompt sync\` after changing a prompt to update the registry. If you are using a custom LangWatch endpoint, ensure you set the \`LANGWATCH_ENDPOINT\` environment variable when running the CLI command.
 
 Example prompt structure:
 \`\`\`yaml
 # prompts/my_prompt.yaml
-model: \${modelExample}
+model: ${modelExample}
 temperature: 0.7
 messages:
   - role: system
@@ -155,12 +155,13 @@ agent = Agent(instructions=prompt.prompt)
 import { LangWatch } from "langwatch";
 
 const langwatch = new LangWatch({
-  apiKey: process.env.LANGWATCH_API_KEY
+  apiKey: process.env.LANGWATCH_API_KEY,
+  endpoint: process.env.LANGWATCH_ENDPOINT // Dynamic endpoint support
 });
 
 const prompt = await langwatch.prompts.get("my_prompt")
 // Use the prompt string with your framework
-\${providerCode}
+${providerCode}
 
 const { text } = await generateText({
   model: model,
@@ -173,6 +174,98 @@ Prompt fetching is very reliable when using the prompts cli because the files ar
 DO NOT add try/catch around it and DO NOT duplicate the prompt here as a fallback
 
 Explore the prompt management get started and data model docs if you need more advanced usages such as compiled prompts with variables or messages list.
+
+### 2.1. LangWatch SDK Initialization and Telemetry
+
+**CRITICAL**: LangWatch observability must be fully integrated from the start. This requires BOTH initializing the SDK AND connecting telemetry to your LLM calls.
+
+**Step 1: Initialize LangWatch SDK**
+
+\`\`\`typescript
+import { LangWatch } from "langwatch";
+
+const langwatch = new LangWatch({
+  apiKey: process.env.LANGWATCH_API_KEY!,
+  endpoint: process.env.LANGWATCH_ENDPOINT // Optional: for self-hosted instances
+});
+\`\`\`
+
+\`\`\`python
+import langwatch
+
+langwatch.login(
+    api_key=os.environ["LANGWATCH_API_KEY"],
+    endpoint=os.environ.get("LANGWATCH_ENDPOINT")  # Optional
+)
+\`\`\`
+
+**Step 2: Enable Telemetry in LLM Calls**
+
+When using Vercel AI SDK (\`generateText\`, \`streamText\`, etc.), enable telemetry:
+
+\`\`\`typescript
+import { generateText } from "ai";
+${providerCode}
+
+const prompt = await langwatch.prompts.get("my_prompt");
+
+const { text } = await generateText({
+  model: model,
+  system: prompt!.prompt,
+  prompt: userInput,
+  experimental_telemetry: {
+    isEnabled: true,
+    functionId: "my-agent-function",
+    metadata: {
+      agentName: "MyAgent",
+      userId: "user-123"
+    }
+  }
+});
+\`\`\`
+
+**Step 3: Verify Traces Appear**
+
+After running your agent:
+1. Check console logs - should NOT see "LangWatch initialization failed"
+2. Visit your LangWatch dashboard (${config.langwatchEndpoint || "https://app.langwatch.ai/"})
+3. Verify traces appear under your project
+
+**Common Mistakes:**
+- ❌ Initializing LangWatch but not setting \`experimental_telemetry\`
+- ❌ Using hardcoded prompts instead of \`langwatch.prompts.get()\`
+- ❌ Missing \`LANGWATCH_API_KEY\` in .env file
+- ❌ Using wrong endpoint for self-hosted instances
+
+**Complete Working Example:**
+
+\`\`\`typescript
+import { LangWatch } from "langwatch";
+import { generateText } from "ai";
+${providerCode}
+
+// 1. Initialize LangWatch SDK
+const langwatch = new LangWatch({
+  apiKey: process.env.LANGWATCH_API_KEY!,
+  endpoint: process.env.LANGWATCH_ENDPOINT
+});
+
+// 2. Fetch prompt from LangWatch (not hardcoded!)
+const prompt = await langwatch.prompts.get("my_agent_prompt");
+
+// 3. Make LLM call with telemetry enabled
+const { text } = await generateText({
+  model: model,
+  system: prompt!.prompt,
+  prompt: "What is 2+2?",
+  experimental_telemetry: {
+    isEnabled: true,
+    functionId: "example-function"
+  }
+});
+
+console.log(text);
+\`\`\`
 
 ### 3. Evaluations for specific cases
 
@@ -197,7 +290,60 @@ Create evaluations in Jupyter notebooks under \`tests/evaluations/\`:
 - ALWAYS use the package manager cli commands to init, add and install new dependencies, DO NOT guess package versions, DO NOT add them to the dependencies file by hand.
 - **Dependency Compatibility Note**: If using Vercel AI SDK, note that \`langwatch\` (v0.13.x) currently requires \`@ai-sdk/openai < 3.0.0\`, which is compatible with \`ai@^5.0.0\`. If you encounter peer dependency conflicts with AI SDK v6, prefer using version 5 of the AI SDK for stable integration with LangWatch.
 - When setting up, remember to load dotenv for the tests so env vars are available
+- **Provider API Keys**: Check the \`.env\` file for the correct key name (e.g., \`OPENROUTER_API_KEY\` instead of \`OPENAI_API_KEY\`). Use the specific provider code example provided in the "Prompt Management" section.
 - Double check the guidelines on AGENTS.md after the end of the implementation.
+
+### 5. LangWatch Integration Verification
+
+Before considering the task complete, you **MUST** verify the integration by checking BOTH your code AND runtime behavior:
+
+#### Code-Level Verification:
+
+✅ **LangWatch SDK Initialized:**
+\`\`\`typescript
+const langwatch = new LangWatch({
+  apiKey: process.env.LANGWATCH_API_KEY!,
+  endpoint: process.env.LANGWATCH_ENDPOINT
+});
+\`\`\`
+
+✅ **Prompts Fetched (Never Hardcoded):**
+\`\`\`typescript
+const prompt = await langwatch.prompts.get("my_prompt"); // ✅ GOOD
+// const prompt = "You are a helpful assistant"; // ❌ BAD
+\`\`\`
+
+✅ **Telemetry Enabled in LLM Calls:**
+\`\`\`typescript
+const result = await generateText({
+  model: model,
+  system: prompt!.prompt,
+  prompt: userInput,
+  experimental_telemetry: {  // ✅ THIS IS REQUIRED
+    isEnabled: true,
+    functionId: "agent-function"
+  }
+});
+\`\`\`
+
+✅ **Scenario Tests Use \`scenario.run()\`:**
+\`\`\`typescript
+await scenario.run({  // ✅ GOOD - reports to LangWatch
+  id: "test-id",
+  name: "Test Name",
+  agents: [myAgent],
+  script: [...]
+});
+\`\`\`
+
+#### Runtime Verification:
+
+1. **Logs**: Run your agent and ensure "LangWatch initialization failed" does NOT appear during startup.
+2. **Traces**: Run a scenario test and verify traces appear in your dashboard (${config.langwatchEndpoint || "https://app.langwatch.ai/"}).
+3. **Simulations**: Verify that \`scenario.run\` produces a clickable link to a simulation result in the test output.
+4. **Environment**: Confirm \`.env\` has \`LANGWATCH_API_KEY\` set and is being loaded correctly (check with \`console.log(process.env.LANGWATCH_API_KEY ? "✓ Key loaded" : "✗ Key missing")\`).
+
+**If any of these fail, you are NOT done.** Fix the environment, SDK initialization, or telemetry configuration before proceeding.
 
 ---
 `;

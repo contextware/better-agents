@@ -81,7 +81,7 @@ const saveCache = async (skills: SkillMetadata[]): Promise<void> => {
     };
 
     await fs.writeFile(CACHE_FILE, JSON.stringify(cached, null, 2), 'utf-8');
-  } catch (error) {
+  } catch {
     logger.userWarning('Failed to save skills cache');
   }
 };
