@@ -1,17 +1,17 @@
 {
   "name": "@contextware/better-agents",
-  "version": "1.1.0",
+  "version": "0.1.22",
   "description": "CLI for kicking off production-ready agent projects with LangWatch best practices. Extended with Contextware skills integration.",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "bin": {
-    "better-agents": "./dist/index.js"
+    "better-agents": "./dist/index.mjs"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     }
   },
   "files": [
