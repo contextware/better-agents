@@ -1,15 +1,71 @@
+import type { ProjectConfig } from "../../types.js";
+
 /**
  * Builds the core principles section including testing pyramid for AGENTS.md.
  *
+ * @param params - Parameters object
+ * @param params.config - Project configuration
  * @returns Markdown string for core principles section
  *
  * @example
  * ```ts
- * const section = buildPrinciplesSection();
+ * const section = buildPrinciplesSection({ config });
  * ```
  */
-export const buildPrinciplesSection = (): string => {
+export const buildPrinciplesSection = ({
+  config,
+}: {
+  config: ProjectConfig;
+}): string => {
+  const llmProvider = config.llmProvider || "openai";
+
+  const getModelExample = () => {
+    switch (llmProvider) {
+      case "anthropic": return "claude-3-5-sonnet-latest";
+      case "gemini": return "gemini-1.5-pro";
+      case "openrouter": return "openai/gpt-4o";
+      case "bedrock": return "anthropic.claude-3-5-sonnet-20240620-v1:0";
+      case "grok": return "grok-1";
+      default: return "gpt-4o";
+    }
+  };
+
+  const getProviderCode = () => {
+    const model = getModelExample();
+    switch (llmProvider) {
+      case "anthropic":
+        return `import { anthropic } from "@ai-sdk/anthropic";\n\nconst model = anthropic("${model}");`;
+      case "gemini":
+        return `import { google } from "@ai-sdk/google";\n\nconst model = google("${model}");`;
+      case "openrouter":
+        return `import { openai } from "@ai-sdk/openai";\n\nconst model = openai("${model}", {\n  baseURL: "https://openrouter.ai/api/v1",\n  apiKey: process.env.OPENROUTER_API_KEY,\n});`;
+      default:
+        return `import { openai } from "@ai-sdk/openai";\n\nconst model = openai("${model}");`;
+    }
+  };
+
+  const modelExample = getModelExample();
+  const providerCode = getProviderCode();
   return `## Core Principles
+
+### 0. Skills as the Primary Source of Truth
+
+**CRITICAL**: Always prefer retrieval-led reasoning over pre-training-led reasoning when skills are installed.
+
+This project uses **Skills** to provide expert guidance. When a skill is installed, its \`SKILL.md\` file becomes the **authoritative source** for that domain - not your training data. Skills may contain APIs, patterns, or configurations that are newer than or differ from your training data.
+
+**Reading Order** (important for best results):
+1. **Explore the project structure first** - understand what exists before making changes
+2. **Read the relevant SKILL.md** - get the expert knowledge for the domain
+3. **Implement with skill guidance** - follow the patterns and tools specified in the skill
+
+**Skill Usage Rules**:
+- **Read before implementing**: Open the skill's \`SKILL.md\` and read it thoroughly before writing any related code
+- **Strict adherence**: Follow the patterns, tool usages, and architectural decisions defined in the skill exactly
+- **Use recommended tools**: Skills define specific MCP tools or libraries that MUST be used
+- **No shortcuts**: Never skip reading skill docs even if you think you know the domain
+
+**CRITICAL**: Failure to follow skill instructions leads to broken implementations. The skill documentation is always the final authority.
 
 ### 1. Scenario Agent Testing
 
@@ -21,6 +77,30 @@ Scenario allows for end-to-end validation of multi-turn conversations and real-w
 - Validate edge cases
 - Ensure business value is delivered
 - Test different conversation paths
+- **ALWAYS use \`scenario.run\`** to trigger simulations that report to LangWatch
+
+**Scenario Test Pattern:**
+\`\`\`typescript
+import * as scenario from "@langwatch/scenario";
+import { myAgent } from "../src/agent"; // Import your agent
+
+it("should handle user request correctly", async () => {
+  await scenario.run({
+    id: "my-feature-test",
+    name: "Testing Core Feature",
+    agents: [myAgent],
+    script: [
+      scenario.user("I want to X"),
+      scenario.agent(), // Wait for agent response
+      (state) => {
+        // Assert on tool calls or state
+        expect(state.lastOutput).toContain("successfully");
+      },
+      scenario.succeed("Goal reached"),
+    ],
+  });
+});
+\`\`\`
 
 Best practices:
 - NEVER check for regex or word matches in the agent's response, use judge criteria instead
@@ -30,6 +110,7 @@ Best practices:
 - Write as few scenarios as possible, try to cover more ground with few scenarios, as they are heavy to run
 - If user made 1 request, just 1 scenario might be enough, run it at the end of the implementation to check if it works
 - ALWAYS consult the Scenario docs **through the LangWatch MCP** on how to install and write scenarios.
+- **IMPORTANT**: Install the library first: \`npm install @langwatch/scenario\` (TS) or \`uv add langwatch-scenario\` (Python).
 
 ### 2. Prompt Management
 
@@ -43,7 +124,7 @@ Best practices:
 Example prompt structure:
 \`\`\`yaml
 # prompts/my_prompt.yaml
-model: gpt-4o
+model: \${modelExample}
 temperature: 0.7
 messages:
   - role: system
@@ -66,7 +147,8 @@ GOOD:
 import langwatch
 
 prompt = langwatch.prompts.get("my_prompt")
-Agent(prompt=prompt.prompt)
+# Use the prompt string with your framework (e.g. Agno)
+agent = Agent(instructions=prompt.prompt)
 \`\`\`
 
 \`\`\`typescript
@@ -77,7 +159,14 @@ const langwatch = new LangWatch({
 });
 
 const prompt = await langwatch.prompts.get("my_prompt")
-Agent(prompt=prompt!.prompt)
+// Use the prompt string with your framework
+\${providerCode}
+
+const { text } = await generateText({
+  model: model,
+  system: prompt!.prompt,
+  prompt: user_input,
+});
 \`\`\`
 
 Prompt fetching is very reliable when using the prompts cli because the files are local (double check they were created with the CLI and are listed on the prompts.json file).
@@ -106,6 +195,7 @@ Create evaluations in Jupyter notebooks under \`tests/evaluations/\`:
 ### 4. General good practices
 
 - ALWAYS use the package manager cli commands to init, add and install new dependencies, DO NOT guess package versions, DO NOT add them to the dependencies file by hand.
+- **Dependency Compatibility Note**: If using Vercel AI SDK, note that \`langwatch\` (v0.13.x) currently requires \`@ai-sdk/openai < 3.0.0\`, which is compatible with \`ai@^5.0.0\`. If you encounter peer dependency conflicts with AI SDK v6, prefer using version 5 of the AI SDK for stable integration with LangWatch.
 - When setting up, remember to load dotenv for the tests so env vars are available
 - Double check the guidelines on AGENTS.md after the end of the implementation.
 

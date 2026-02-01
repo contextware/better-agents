@@ -81,13 +81,13 @@ export const setupCLIConfigs = async ({
     }
 
     const crushMCP = crushConfig.mcp as Record<string, unknown>;
-    
+
     // Convert each MCP server to Crush's format
     for (const [key, server] of Object.entries(mcpConfig.mcpServers)) {
       if (typeof server === "object" && server !== null) {
         // If it already has a type, use it; otherwise default to "stdio"
         const serverConfig = server as { type?: string; command?: string; args?: string[]; transport?: string; url?: string };
-        
+
         if ("type" in serverConfig && serverConfig.type === "http") {
           // HTTP transport
           crushMCP[key] = {
@@ -101,6 +101,7 @@ export const setupCLIConfigs = async ({
             type: "stdio",
             command: serverConfig.command,
             args: serverConfig.args || [],
+            env: (server as any).env || {},
           };
         }
       }

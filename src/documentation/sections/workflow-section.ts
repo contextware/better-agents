@@ -40,16 +40,18 @@ This project follows a standardized structure for production-ready agents:
 
 ### When Starting a New Feature:
 
-1. **Understand Requirements**: Clarify what the agent should do
-2. **Design the Approach**: Plan which components you'll need
-3. **Implement with Prompts**: Use LangWatch Prompt CLI to create/manage prompts
-4. **Write Unit Tests**: Test deterministic components
-5. **Create Evaluations**: Build evaluation notebooks for probabilistic components
-6. **Write Scenario Tests**: Create end-to-end tests using Scenario
-7. **Run Tests**: Verify everything works before moving on
+1. **Check Installed Skills**: Review the "Installed Skills" section below and read their documentation.
+2. **Understand Requirements**: Clarify what the agent should do
+3. **Design the Approach**: Plan which components and skills you'll need
+4. **Implement with Prompts**: Use LangWatch Prompt CLI to create/manage prompts
+5. **Write Unit Tests**: Test deterministic components
+6. **Create Evaluations**: Build evaluation notebooks for probabilistic components
+7. **Write Scenario Tests**: Create end-to-end tests using Scenario
+8. **Run Tests**: Verify everything works before moving on
 
 ### Always:
 
+- ✅ Follow specialized instructions in \`SKILL.md\` files
 - ✅ Version control your prompts
 - ✅ Write tests for new features
 - ✅ Use LangWatch MCP to learn best practices and to work with Scenario tests and evaluations
@@ -96,14 +98,14 @@ The MCP will provide up-to-date documentation and examples. For Scenario specifi
     ${config.framework === 'agno'
       ? '- **Agno Documentation**: https://docs.agno.com/'
       : config.framework === 'langgraph-py'
-      ? '- **LangGraph/LangChain Documentation**: Use the LangGraph MCP for up-to-date docs'
-      : config.framework === 'langgraph-ts'
-      ? '- **LangGraph.js Documentation**: Use the LangGraph MCP for up-to-date docs'
-      : config.framework === 'google-adk'
-      ? '- **Google ADK Documentation**: Use the Google ADK MCP for up-to-date docs'
-      : config.framework === 'vercel-ai'
-      ? '- **AI SDK Documentation**: Use the AI SDK MCP for up-to-date docs'
-      : '- **Mastra Documentation**: Use the Mastra MCP for up-to-date docs'}
+        ? '- **LangGraph/LangChain Documentation**: Use the LangGraph MCP for up-to-date docs'
+        : config.framework === 'langgraph-ts'
+          ? '- **LangGraph.js Documentation**: Use the LangGraph MCP for up-to-date docs'
+          : config.framework === 'google-adk'
+            ? '- **Google ADK Documentation**: Use the Google ADK MCP for up-to-date docs'
+            : config.framework === 'vercel-ai'
+              ? '- **AI SDK Documentation**: Use the AI SDK MCP for up-to-date docs'
+              : '- **Mastra Documentation**: Use the Mastra MCP for up-to-date docs'}
 
 ---
 

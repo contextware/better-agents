@@ -24,11 +24,25 @@ export const buildMCPConfig = ({
     mcpServers: {},
   };
 
-  // Always add LangWatch MCP
-  mcpConfig.mcpServers.langwatch = {
+  // Always add LangWatch MCP with optional endpoint configuration
+  const langwatchServer: {
+    command: string;
+    args: string[];
+    env?: Record<string, string>;
+  } = {
     command: "npx",
     args: ["-y", "@langwatch/mcp-server"],
   };
+
+  // If a custom LangWatch endpoint is configured, pass it to the MCP server
+  // This ensures Scenario tests and other LangWatch features use the correct endpoint
+  if (config.langwatchEndpoint) {
+    langwatchServer.env = {
+      LANGWATCH_ENDPOINT: config.langwatchEndpoint,
+    };
+  }
+
+  mcpConfig.mcpServers.langwatch = langwatchServer;
 
   // Add framework-specific MCP if available
   const frameworkProvider = getFrameworkProvider({

@@ -67,6 +67,7 @@ You'll be prompted with:
 ### Question 6: LangWatch API Key
 ```
 To get your LangWatch API key, visit:
+your LangWatch instance or at
 https://app.langwatch.ai/authorize
 
 ? Enter your LangWatch API key: ********************************

@@ -36,6 +36,7 @@ export const generateEnvFiles = async ({
     "",
     "# LangWatch",
     "LANGWATCH_API_KEY=your_langwatch_api_key_here",
+    "# LANGWATCH_ENDPOINT=https://your-private-langwatch.example.com  # Optional: defaults to https://app.langwatch.ai",
   ];
   const envExample = envExampleLines.join("\n") + "\n";
 
@@ -49,6 +50,12 @@ export const generateEnvFiles = async ({
     "# LangWatch",
     `LANGWATCH_API_KEY=${config.langwatchApiKey}`,
   ];
+
+  // Add LANGWATCH_ENDPOINT if provided
+  if (config.langwatchEndpoint) {
+    envContentLines.push(`LANGWATCH_ENDPOINT=${config.langwatchEndpoint}`);
+  }
+
   const envContent = envContentLines.join("\n") + "\n";
 
   await fs.writeFile(path.join(projectPath, ".env"), envContent);

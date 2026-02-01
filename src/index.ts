@@ -72,6 +72,11 @@ Environment variables (set before running):
     LANGWATCH_API_KEY             Required for all projects
                                   (get one at: https://app.langwatch.ai/authorize)
 
+  Optional:
+    LANGWATCH_ENDPOINT            LangWatch endpoint URL
+                                  (defaults to https://app.langwatch.ai for public cloud)
+                                  Set this if using a private LangWatch installation
+
   LLM provider (pick exactly one):
     openai                        OPENAI_API_KEY="sk-..."
     anthropic                     ANTHROPIC_API_KEY="sk-ant-..."
@@ -102,6 +107,16 @@ Examples:
     better-agents init \
       --llm-provider bedrock \
       --aws-region us-west-2
+
+  # With specific skills installed
+  LANGWATCH_API_KEY="sk-lw-..." ANTHROPIC_API_KEY="sk-ant-..." \
+    better-agents init . \
+      --language typescript \
+      --framework mastra \
+      --llm-provider anthropic \
+      --coding-assistant claude-code \
+      --goal "Build a network operations agent" \
+      --skills create-incident,incident-listing
 `)
   .argument(
     "[path]",
@@ -114,6 +129,9 @@ Examples:
   .option("--coding-assistant <assistant>", "Coding assistant: claude-code, cursor, antigravity, kilocode, crush, gemini-cli, qwen-code, none")
   .option("--goal <goal>", "Project goal - what the agent should do")
   .option("--aws-region <region>", "AWS Region (for Bedrock provider)", "us-east-1")
+  .option("--skills <skills>", "Comma-separated list of skills to install, or 'all' for all available skills")
+  .option("--langwatch-endpoint <endpoint>", "LangWatch endpoint URL (defaults to https://app.langwatch.ai)")
+  .option("-r, --refresh-skills", "Force refresh skills list from GitHub (ignores 24h cache)")
   .action((path, options, command) => {
     // Get debug from parent command
     const debug = command.parent?.opts()?.debug || false;
@@ -126,6 +144,9 @@ Examples:
       codingAssistant: options.codingAssistant,
       goal: options.goal,
       awsRegion: options.awsRegion,
+      skills: options.skills,
+      langwatchEndpoint: options.langwatchEndpoint,
+      refreshSkills: options.refreshSkills,
     };
 
     // Validate enum values upfront with helpful error messages

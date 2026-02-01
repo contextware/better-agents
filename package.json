@@ -1,7 +1,7 @@
 {
-  "name": "@langwatch/better-agents",
-  "version": "0.1.22",
-  "description": "CLI for kicking off production-ready agent projects with LangWatch best practices",
+  "name": "@contextware/better-agents",
+  "version": "1.1.0",
+  "description": "CLI for kicking off production-ready agent projects with LangWatch best practices. Extended with Contextware skills integration.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -41,6 +41,7 @@
     ]
   },
   "keywords": [
+    "contextware",
     "langwatch",
     "agents",
     "cli",
@@ -52,21 +53,25 @@
     "mastra",
     "prompt-management",
     "scenario-testing",
+    "skills",
     "mcp",
     "model-context-protocol",
     "ai-testing",
-    "evaluation"
+    "evaluation",
+    "incident-management",
+    "telecom",
+    "network-operations"
   ],
-  "author": "LangWatch",
+  "author": "Contextware (forked from LangWatch)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/langwatch/better-agents.git"
+    "url": "https://github.com/contextware/better-agents.git"
   },
   "bugs": {
-    "url": "https://github.com/langwatch/better-agents/issues"
+    "url": "https://github.com/contextware/better-agents/issues"
   },
-  "homepage": "https://github.com/langwatch/better-agents#readme",
+  "homepage": "https://github.com/contextware/better-agents#readme",
   "engines": {
     "node": ">=18.0.0"
   },

@@ -2,10 +2,10 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "package-name": "@langwatch/better-agents",
+      "package-name": "@contextware/better-agents",
       "include-component-in-tag": false,
       "include-v-in-tag": true,
-      "prerelease": true,
+      "prerelease": false,
       "changelog-sections": [
         { "type": "feat", "section": "Features" },
         { "type": "fix", "section": "Bug Fixes" },

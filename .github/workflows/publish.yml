@@ -7,7 +7,6 @@ on:
   workflow_call:
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -84,9 +83,7 @@ jobs:
             echo "tag=latest" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Upgrade npm for OIDC trusted publishing
-        run: npm install -g npm@latest # Ensures npm >= 11.5.1
-
-      - name: Publish to npm (Trusted Publisher OIDC)
+      - name: Publish to npm
         run: pnpm publish --no-git-checks --tag ${{ steps.disttag.outputs.tag }}
-        # No NODE_AUTH_TOKEN env! OIDC will be used automatically
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

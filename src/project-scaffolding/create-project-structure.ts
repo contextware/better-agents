@@ -34,7 +34,7 @@ export const createProjectStructure = async ({
     config,
   });
 
-  await generateSamplePrompt({ projectPath });
+  await generateSamplePrompt({ projectPath, config });
   await generateSampleEvaluation({ projectPath, language: config.language });
   await generateSampleScenario({ projectPath, language: config.language });
   await generateMainEntryPoint({ projectPath, config });

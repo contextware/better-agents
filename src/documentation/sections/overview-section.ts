@@ -17,23 +17,24 @@ export const buildOverviewSection = ({ config }: { config: ProjectConfig }): str
 
   return `# Agent Development Guidelines
 
+**IMPORTANT**: Prefer retrieval-led reasoning over pre-training-led reasoning. Always consult the documentation in this file and installed skills before implementing features. This project may use APIs, patterns, or tools that differ from your training data.
+
 ## Project Overview
 
 **Goal:** ${projectGoal}
 
-**Framework:** ${
-  framework === 'agno'
-    ? 'Agno'
-    : framework === 'langgraph-py'
-    ? 'LangGraph (Python)'
-    : framework === 'langgraph-ts'
-    ? 'LangGraph (TypeScript)'
-    : framework === 'google-adk'
-    ? 'Google ADK'
-    : framework === 'vercel-ai'
-    ? 'Vercel AI SDK'
-    : 'Mastra'
-}
+**Framework:** ${framework === 'agno'
+      ? 'Agno'
+      : framework === 'langgraph-py'
+        ? 'LangGraph (Python)'
+        : framework === 'langgraph-ts'
+          ? 'LangGraph (TypeScript)'
+          : framework === 'google-adk'
+            ? 'Google ADK'
+            : framework === 'vercel-ai'
+              ? 'Vercel AI SDK'
+              : 'Mastra'
+    }
 **Language:** ${language === 'python' ? 'Python' : 'TypeScript'}
 
 This project follows the Better Agents standard for building production-ready AI agents.

@@ -13,14 +13,64 @@ import type { ProjectConfig } from "../../../types.js";
  * ```
  */
 export const getKnowledge = ({
-  config: _config,
+  config,
 }: {
   config: ProjectConfig;
-}): FrameworkKnowledge => ({
-  setupInstructions: "Python w/uv + pytest",
-  toolingInstructions:
-    "Use the Agno MCP to learn about Agno and how to build agents",
-  agentsGuideSection: `## Framework-Specific Guidelines
+}): FrameworkKnowledge => {
+  const llmProvider = config.llmProvider || "openai";
+
+  const getModelId = () => {
+    switch (llmProvider) {
+      case "anthropic":
+        return "claude-3-5-sonnet-latest";
+      case "gemini":
+        return "gemini-1.5-pro";
+      case "openrouter":
+        return "openai/gpt-4o";
+      case "bedrock":
+        return "anthropic.claude-3-5-sonnet-20240620-v1:0";
+      case "grok":
+        return "grok-1";
+      default:
+        return "gpt-4o";
+    }
+  };
+
+  const getModelImport = () => {
+    switch (llmProvider) {
+      case "anthropic":
+        return "from agno.models.anthropic import AnthropicChat";
+      case "gemini":
+        return "from agno.models.google import Gemini";
+      case "openrouter":
+        return "from agno.models.openai import OpenAIChat";
+      default:
+        return "from agno.models.openai import OpenAIChat";
+    }
+  };
+
+  const getModelInit = () => {
+    const modelId = getModelId();
+    switch (llmProvider) {
+      case "anthropic":
+        return `AnthropicChat(id="${modelId}")`;
+      case "gemini":
+        return `Gemini(id="${modelId}")`;
+      case "openrouter":
+        return `OpenAIChat(id="${modelId}", base_url="https://openrouter.ai/api/v1", api_key=os.getenv("OPENROUTER_API_KEY"))`;
+      default:
+        return `OpenAIChat(id="${modelId}")`;
+    }
+  };
+
+  const modelImport = getModelImport();
+  const modelInit = getModelInit();
+
+  return {
+    setupInstructions: "Python w/uv + pytest",
+    toolingInstructions:
+      "Use the Agno MCP to learn about Agno and how to build agents",
+    agentsGuideSection: `## Framework-Specific Guidelines
 
 ### Agno Framework
 
@@ -38,11 +88,12 @@ export const getKnowledge = ({
 
 **Basic Agent:**
 \`\`\`python
+import os
 from agno.agent import Agent
-from agno.models.openai import OpenAIChat
+${modelImport}
 
 agent = Agent(
-    model=OpenAIChat(id="gpt-4o"),
+    model=${modelInit},
     instructions="You are a helpful assistant",
     markdown=True,
 )
@@ -54,7 +105,7 @@ agent.print_response("Your query", stream=True)
 from agno.tools.duckduckgo import DuckDuckGoTools
 
 agent = Agent(
-    model=OpenAIChat(id="gpt-4o"),
+    model=${modelInit},
     tools=[DuckDuckGoTools()],
     instructions="Search the web for information",
 )
@@ -86,7 +137,7 @@ class Result(BaseModel):
     findings: list[str]
 
 agent = Agent(
-    model=OpenAIChat(id="gpt-4o"),
+    model=${modelInit},
     output_schema=Result,
 )
 result: Result = agent.run(query).content
@@ -103,5 +154,6 @@ result: Result = agent.run(query).content
 
 ---
 `,
-});
+  };
+};
 

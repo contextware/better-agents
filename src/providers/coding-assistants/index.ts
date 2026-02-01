@@ -12,15 +12,16 @@ export type MCPConfigFile = {
   mcpServers: Record<
     string,
     | {
-        type?: "stdio";
-        command: string;
-        args?: string[];
-      }
+      type?: "stdio";
+      command: string;
+      args?: string[];
+      env?: Record<string, string>;
+    }
     | {
-        type: "http";
-        transport: string;
-        url: string;
-      }
+      type: "http";
+      transport: string;
+      url: string;
+    }
   >;
 };
 
@@ -59,8 +60,8 @@ const PROVIDERS: Record<CodingAssistant, CodingAssistantProvider> = {
   "claude-code": ClaudeCodingAssistantProvider,
   cursor: CursorCodingAssistantProvider,
   antigravity: AntigravityCodingAssistantProvider,
-  
-    crush: CrushCodingAssistantProvider,
+
+  crush: CrushCodingAssistantProvider,
   'gemini-cli': GeminiCLICodingAssistantProvider,
   'qwen-code': QwenCodeCodingAssistantProvider,
   none: NoneCodingAssistantProvider,

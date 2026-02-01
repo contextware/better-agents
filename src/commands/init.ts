@@ -11,6 +11,7 @@ import { setupEditorConfigs } from "../builders/editor-setup-builder.js";
 import { setupAntigravityMCPConfig } from "../providers/coding-assistants/antigravity/index.js";
 import { kickoffAssistant } from "../assistant-kickoff/kickoff-assistant.js";
 import { LoggerFacade } from "../utils/logger/logger-facade.js";
+import { installSkills, fetchSkills } from "../providers/skills/index.js";
 import {
   trackEvent,
   shutdown,
@@ -184,6 +185,30 @@ export const initCommand = async (
       // (run after framework setup as some frameworks create their own .gitignore)
       await ensureGitignore({ projectPath: absolutePath });
 
+      // Install selected skills
+      if (config.skills && config.skills.length > 0) {
+        const skillsTimer = projectLogger.startTimer('skills-installation');
+        spinner.text = "Installing selected skills...";
+
+        try {
+          await installSkills({
+            skills: config.skills,
+            projectPath: absolutePath,
+            spinner,
+          });
+          skillsTimer();
+          spinner.text = "Skills installed successfully";
+        } catch (error) {
+          skillsTimer();
+          projectLogger.userWarning(
+            `Some skills failed to install: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+          projectLogger.userInfo(
+            'You can install them manually with: npx skills add https://github.com/contextware/skills --skill <skill-name>'
+          );
+        }
+      }
+
       // Build MCP config and set up all editor configurations
       const editorTimer = projectLogger.startTimer('editor-setup');
       const mcpConfig = buildMCPConfig({ config });
@@ -196,9 +221,23 @@ export const initCommand = async (
       editorTimer();
       spinner.text = "Editor configurations set up";
 
-      // Build AGENTS.md using builder
+      // Build AGENTS.md using builder with skills metadata
       const agentsTimer = projectLogger.startTimer('agents-guide');
-      await buildAgentsGuide({ projectPath: absolutePath, config });
+
+      // Fetch skills metadata for richer AGENTS.md content
+      let skillsMetadata;
+      if (config.skills && config.skills.length > 0) {
+        try {
+          const allSkills = await fetchSkills({
+            forceRefresh: cliOptions.refreshSkills
+          });
+          skillsMetadata = allSkills.filter(s => config.skills?.includes(s.name));
+        } catch {
+          projectLogger.debug('Could not fetch skills metadata for AGENTS.md');
+        }
+      }
+
+      await buildAgentsGuide({ projectPath: absolutePath, config, skillsMetadata });
       agentsTimer();
       spinner.text = "AGENTS.md generated";
 

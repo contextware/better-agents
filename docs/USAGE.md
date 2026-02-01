@@ -33,7 +33,7 @@ The CLI configuration includes:
 API keys are provided via environment variables, not CLI arguments. This follows security best practices and scales better with multiple providers.
 
 ### Required for All Projects
-- `LANGWATCH_API_KEY` - Get it at https://app.langwatch.ai/authorize
+- `LANGWATCH_API_KEY` - Get it from your LangWatch instance or at https://app.langwatch.ai/authorize 
 
 ### LLM Provider API Keys
 Set the appropriate variable based on your `--llm-provider` choice:

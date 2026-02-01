@@ -1,4 +1,4 @@
-import { select, input, password, confirm } from "@inquirer/prompts";
+import { select, input, password, confirm, checkbox } from "@inquirer/prompts";
 import { spawn } from "child_process";
 import type {
   ProjectConfig,
@@ -12,8 +12,10 @@ import { logger } from "../utils/logger/index.js";
 import { buildLanguageChoices } from "./choice-builders/language-choices.js";
 import { buildFrameworkChoices } from "./choice-builders/framework-choices.js";
 import { buildCodingAssistantChoices } from "./choice-builders/coding-assistant-choices.js";
+import { buildSkillChoices } from "./choice-builders/skill-choices.js";
 import { getAllLLMProviders } from "../providers/llm-providers/index.js";
 import { getAllCodingAssistants } from "../providers/coding-assistants/index.js";
+import { fetchSkills } from "../providers/skills/index.js";
 import { validateOpenAIKey } from "./validators/openai-key.js";
 import { validateLangWatchKey } from "./validators/langwatch-key.js";
 import { validateProjectGoal } from "./validators/project-goal.js";
@@ -78,6 +80,16 @@ export const collectConfig = async (
   cliOptions: CLIOptions = {}
 ): Promise<ProjectConfig> => {
   const configStart = Date.now();
+
+  // Prime skills cache early and handle force refresh immediately if requested
+  // This ensures the latest skills are available for selection and provides early feedback
+  await fetchSkills({
+    showStatus: cliOptions.refreshSkills || false,
+    forceRefresh: cliOptions.refreshSkills || false,
+  }).catch(() => {
+    // Silent fail here, we'll handle actual errors later in the flow
+  });
+
   try {
     // Auto-detect non-interactive mode: if all required options are provided, skip prompts
     if (isNonInteractiveMode(cliOptions)) {
@@ -86,13 +98,22 @@ export const collectConfig = async (
       // Validate framework/language compatibility
       validateFrameworkLanguage(cliOptions.language!, cliOptions.framework!);
 
+      // LangWatch Endpoint - check CLI option, then environment variable
+      const langwatchEndpoint =
+        cliOptions.langwatchEndpoint ||
+        process.env.LANGWATCH_ENDPOINT ||
+        undefined;
+
+      // Determine the base URL for error messages
+      const langwatchBaseUrl = langwatchEndpoint || "https://app.langwatch.ai";
+
       // Read API keys from environment variables
       const langwatchApiKey = process.env.LANGWATCH_API_KEY;
       if (!langwatchApiKey) {
         throw new Error(
           `Missing required environment variable: LANGWATCH_API_KEY\n\n` +
           `When using Better Agents, you must set the LANGWATCH_API_KEY environment variable.\n\n` +
-          `Get your LangWatch API key at: https://app.langwatch.ai/authorize`
+          `Get your LangWatch API key at: ${langwatchBaseUrl}/authorize`
         );
       }
 
@@ -126,7 +147,7 @@ export const collectConfig = async (
         llmApiKey = process.env.AWS_ACCESS_KEY_ID || "";
         const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || "";
         const awsRegion = process.env.AWS_REGION || cliOptions.awsRegion || "us-east-1";
-        
+
         if (!llmApiKey || !awsSecretAccessKey) {
           const missing = [];
           if (!llmApiKey) missing.push("AWS_ACCESS_KEY_ID");
@@ -135,7 +156,7 @@ export const collectConfig = async (
             `Missing required environment variable(s): ${missing.join(", ")}. See 'better-agents init --help' for setup.`
           );
         }
-        
+
         llmAdditionalInputs = {
           awsSecretAccessKey,
           awsRegion,
@@ -168,6 +189,24 @@ export const collectConfig = async (
         }
       }
 
+      // Parse skills option
+      let skills: string[] | undefined;
+      if (cliOptions.skills) {
+        if (cliOptions.skills === 'all') {
+          try {
+            const allSkills = await fetchSkills({
+              forceRefresh: cliOptions.refreshSkills || false,
+              showStatus: cliOptions.refreshSkills || false,
+            });
+            skills = allSkills.map(s => s.name);
+          } catch {
+            logger.userWarning('Failed to fetch skills list. Skipping skill installation.');
+          }
+        } else {
+          skills = cliOptions.skills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        }
+      }
+
       // Return config directly without prompts
       return {
         language: cliOptions.language!,
@@ -177,7 +216,9 @@ export const collectConfig = async (
         llmApiKey,
         llmAdditionalInputs,
         langwatchApiKey,
+        langwatchEndpoint,
         projectGoal: cliOptions.goal!,
+        skills,
       };
     }
 
@@ -218,7 +259,7 @@ export const collectConfig = async (
 
     // LLM API Key - check environment variable first, then prompt
     let llmApiKey: string | undefined;
-    
+
     // Check for provider-specific env var
     if (llmProvider === "openai") {
       llmApiKey = process.env.OPENAI_API_KEY;
@@ -248,11 +289,11 @@ export const collectConfig = async (
           llmProvider === "openai"
             ? validateOpenAIKey
             : (value) => {
-                if (!value || value.length < 5) {
-                  return "API key is required and must be at least 5 characters";
-                }
-                return true;
-              },
+              if (!value || value.length < 5) {
+                return "API key is required and must be at least 5 characters";
+              }
+              return true;
+            },
       });
     }
 
@@ -298,12 +339,46 @@ export const collectConfig = async (
       }
     }
 
+    // LangWatch Endpoint - check CLI option, then environment variable, then prompt if not provided
+    let langwatchEndpoint =
+      cliOptions.langwatchEndpoint ||
+      process.env.LANGWATCH_ENDPOINT;
+
+    // If not provided via CLI or env var, ask user (with option to skip for default)
+    if (!langwatchEndpoint && !cliOptions.langwatchEndpoint) {
+      const customEndpoint = await confirm({
+        message: "Are you using a private LangWatch installation?",
+        default: false,
+      });
+
+      if (customEndpoint) {
+        langwatchEndpoint = await input({
+          message: "Enter your LangWatch endpoint URL:",
+          default: "https://app.langwatch.ai",
+          validate: (value) => {
+            if (!value || value.trim().length === 0) {
+              return "LangWatch endpoint URL is required";
+            }
+            try {
+              new URL(value);
+              return true;
+            } catch {
+              return "Please enter a valid URL (e.g., https://langwatch.example.com)";
+            }
+          },
+        });
+      }
+    }
+
+    // Determine the base URL for LangWatch (for displaying where to get API key)
+    const langwatchBaseUrl = langwatchEndpoint || "https://app.langwatch.ai";
+
     // LangWatch API Key - check environment variable first, then prompt
     let langwatchApiKey = process.env.LANGWATCH_API_KEY;
-    
+
     if (!langwatchApiKey) {
       logger.userInfo("To get your LangWatch API key, visit:");
-      logger.userInfo("https://app.langwatch.ai/authorize");
+      logger.userInfo(`${langwatchBaseUrl}/authorize`);
 
       langwatchApiKey = await password({
         message:
@@ -373,8 +448,7 @@ export const collectConfig = async (
               }
             } catch (error) {
               logger.userError(
-                `Installation failed: ${
-                  error instanceof Error ? error.message : "Unknown error"
+                `Installation failed: ${error instanceof Error ? error.message : "Unknown error"
                 }`
               );
               logger.userInfo("Please try installing manually.");
@@ -406,12 +480,66 @@ export const collectConfig = async (
       }
     }
 
-    logger.userInfo("✔︎ Your coding assistant will finish setup later if needed\n");
+    // Prompt for skills selection (before project goal)
+    let selectedSkills: string[] = [];
+    try {
+      // If refresh wasn't already forced via CLI, ask the user in interactive mode
+      if (!cliOptions.refreshSkills) {
+        const shouldRefresh = await confirm({
+          message:
+            "Would you like to refresh the skills list from GitHub to ensure you have the latest available skills?",
+          default: false,
+        });
 
-    const projectGoal: string = cliOptions.goal || await input({
+        if (shouldRefresh) {
+          await fetchSkills({
+            forceRefresh: true,
+            showStatus: true,
+          }).catch(() => {
+            logger.userWarning(
+              "Failed to refresh skills list, using cached version."
+            );
+          });
+        }
+      }
+
+      logger.debug("Fetching available skills from GitHub...");
+      // This call will be instant as it was already primed at the start (or just refreshed above)
+      const availableSkills = await fetchSkills({ showStatus: true });
+      logger.debug(`Fetched ${availableSkills.length} skills`);
+
+      if (availableSkills.length > 0) {
+        selectedSkills = await checkbox({
+          message: "Select skills to install (optional - space to select, enter to confirm):",
+          choices: buildSkillChoices(availableSkills),
+          pageSize: 10,
+        });
+        logger.debug(`User selected ${selectedSkills.length} skills: ${selectedSkills.join(', ')}`);
+      } else {
+        logger.userWarning("No skills available to select");
+      }
+    } catch (error) {
+      logger.userWarning("Failed to fetch available skills");
+      logger.debug(`Error details: ${error instanceof Error ? error.message : String(error)}`);
+      logger.userInfo("You can add skills later with: npx skills add contextware/skills --skill <skill-name>");
+    }
+
+    let projectGoal: string = cliOptions.goal || await input({
       message: "What is your agent going to do?",
       validate: validateProjectGoal,
     });
+
+    // If skills are selected and it's interactive (not provided via CLI goal option),
+    // prepend the skills to the goal to make it more directive as requested by user.
+    if (selectedSkills.length > 0 && !cliOptions.goal) {
+      const skillsList = selectedSkills.map(s => `"${s}"`).join(', ');
+      const skillsPrefix = `Using the ${skillsList} skill${selectedSkills.length > 1 ? 's' : ''}, `;
+
+      // Check if the goal already starts with a similar prefix to avoid duplication
+      if (!projectGoal.toLowerCase().startsWith('using the')) {
+        projectGoal = `${skillsPrefix}${projectGoal.charAt(0).toLowerCase()}${projectGoal.slice(1)}`;
+      }
+    }
 
     // Treat prompt_shown as "configuration done" to avoid redundant events
     await trackEvent("cli_prompt_shown", {
@@ -430,7 +558,9 @@ export const collectConfig = async (
       llmApiKey,
       llmAdditionalInputs,
       langwatchApiKey,
+      langwatchEndpoint,
       projectGoal,
+      skills: selectedSkills.length > 0 ? selectedSkills : undefined,
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes("User force closed")) {

@@ -25,7 +25,9 @@ export type ProjectConfig = {
   llmApiKey: string;
   llmAdditionalInputs?: Record<string, string>;
   langwatchApiKey: string;
+  langwatchEndpoint?: string;
   projectGoal: string;
+  skills?: string[];
 };
 
 /**
@@ -41,5 +43,11 @@ export type CLIOptions = {
   goal?: string;
   /** AWS Region for Bedrock provider (optional configuration, not a credential) */
   awsRegion?: string;
+  /** Comma-separated list of skills to install, or 'all' for all skills */
+  skills?: string;
+  /** LangWatch endpoint URL (defaults to https://app.langwatch.ai if not specified) */
+  langwatchEndpoint?: string;
+  /** Force refresh skills from GitHub, ignoring cache */
+  refreshSkills?: boolean;
 };
 
