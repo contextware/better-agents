@@ -103,7 +103,7 @@ export const clearSkillsCache = async (): Promise<void> => {
  */
 const fetchSkillMetadata = async (skillName: string): Promise<SkillMetadata | null> => {
   try {
-    const url = `https://raw.githubusercontent.com/${SKILLS_REPO_OWNER}/${SKILLS_REPO_NAME}/main/${skillName}/SKILL.md`;
+    const url = `https://raw.githubusercontent.com/${SKILLS_REPO_OWNER}/${SKILLS_REPO_NAME}/main/skills/${skillName}/SKILL.md`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -160,7 +160,7 @@ export const fetchSkills = async (options: FetchSkillsOptions = {}): Promise<Ski
     }
     logger.debug('Fetching skills from GitHub...');
 
-    const url = `${GITHUB_API_BASE}/repos/${SKILLS_REPO_OWNER}/${SKILLS_REPO_NAME}/contents`;
+    const url = `${GITHUB_API_BASE}/repos/${SKILLS_REPO_OWNER}/${SKILLS_REPO_NAME}/contents/skills`;
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github.v3+json',
